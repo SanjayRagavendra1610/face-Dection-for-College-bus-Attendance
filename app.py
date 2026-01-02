@@ -98,16 +98,19 @@ def register_student():
         department = request.form.get("department")
         year = request.form.get("year")
         
-        # Save to Firebase
-        db.collection("students").document(str(student_id)).set({
-            "student_id": student_id,
-            "name": name,
-            "email": email,
-            "department": department,
-            "year": year,
-            "status": "active",
-            "created_at": datetime.now()
-        })
+        # Save to Firebase if available
+        if db:
+            db.collection("students").document(str(student_id)).set({
+                "student_id": student_id,
+                "name": name,
+                "email": email,
+                "department": department,
+                "year": year,
+                "status": "active",
+                "created_at": datetime.now()
+            })
+        else:
+            print(f"⚠️  Firebase unavailable - student data not saved to database")
         
         return redirect("/register")
     except Exception as e:
@@ -149,9 +152,10 @@ def manage_users():
 def get_students():
     try:
         students = []
-        docs = db.collection("students").stream()
-        for doc in docs:
-            students.append(doc.to_dict())
+        if db:
+            docs = db.collection("students").stream()
+            for doc in docs:
+                students.append(doc.to_dict())
         return jsonify({"students": students})
     except Exception as e:
         print(f"Error fetching students: {e}")
@@ -163,15 +167,18 @@ def add_student():
         data = request.get_json()
         student_id = data.get("student_id")
         
-        db.collection("students").document(str(student_id)).set({
-            "student_id": student_id,
-            "name": data.get("name"),
-            "email": data.get("email"),
-            "department": data.get("department"),
-            "year": data.get("year"),
-            "status": "active",
-            "created_at": datetime.now()
-        })
+        if db:
+            db.collection("students").document(str(student_id)).set({
+                "student_id": student_id,
+                "name": data.get("name"),
+                "email": data.get("email"),
+                "department": data.get("department"),
+                "year": data.get("year"),
+                "status": "active",
+                "created_at": datetime.now()
+            })
+        else:
+            print(f"⚠️  Firebase unavailable - student {student_id} not saved to database")
         
         return jsonify({"success": True, "message": "Student added successfully"})
     except Exception as e:
@@ -181,7 +188,8 @@ def add_student():
 @app.route("/api/students/<student_id>", methods=["DELETE"])
 def delete_student(student_id):
     try:
-        db.collection("students").document(str(student_id)).delete()
+        if db:
+            db.collection("students").document(str(student_id)).delete()
         return jsonify({"success": True, "message": "Student deleted successfully"})
     except Exception as e:
         print(f"Error deleting student: {e}")
@@ -203,8 +211,12 @@ def get_attendance():
                     "status": "Present"
                 })
         
-        # Fetch from Firebase to enrich with names
-        students = {str(doc.id): doc.to_dict() for doc in db.collection("students").stream()}
+        # Fetch from Firebase to enrich with names (if available)
+        if db:
+            students = {str(doc.id): doc.to_dict() for doc in db.collection("students").stream()}
+        else:
+            students = {}
+        
         for record in records:
             student_info = students.get(record["student_id"], {})
             record["student_name"] = student_info.get("name", "Unknown")
@@ -219,7 +231,10 @@ def get_attendance():
 def get_stats():
     try:
         # Get total students
-        students_count = len(list(db.collection("students").stream()))
+        if db:
+            students_count = len(list(db.collection("students").stream()))
+        else:
+            students_count = 0
         
         # Get total faces (count files in dataset)
         faces_count = 0
