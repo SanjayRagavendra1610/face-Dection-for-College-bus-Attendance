@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Attendance Report — Face Attendance System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .attendance-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .attendance-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .attendance-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, var(--accent), #5df2c6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .filters {
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            color: #eaf6f0;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            color: #eaf6f0;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(59,227,176,0.03);
+        }
+
+        .table-wrapper {
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(3,10,18,0.6);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #eaf6f0;
+        }
+
+        thead {
+            background: rgba(59,227,176,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 0.95rem;
+        }
+
+        td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        tbody tr:hover {
+            background: rgba(59,227,176,0.02);
+        }
+
+        .status-present {
+            color: #3be3b0;
+            font-weight: 600;
+        }
+
+        .status-absent {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            padding: 3rem;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .export-btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(90deg, var(--accent), #5df2c6);
+            color: #042018;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            margin-top: 1.5rem;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59,227,176,0.3);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 1.5rem;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        @media (max-width: 900px) {
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="brand">
+                <h1 class="college">Sankara College of Science and commerce</h1>
+                <p class="tag">Face Recognition Attendance</p>
+            </div>
+            <nav class="nav">
+                <a href="/">Home</a>
+                <a href="/register">Register</a>
+                <a href="/train">Train</a>
+                <a href="/attendance">Attendance</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container attendance-container">
+        <div class="attendance-header">
+            <h1>📊 Attendance Report</h1>
+            <p>View and manage attendance records</p>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="filterDate">Date</label>
+                <input type="date" id="filterDate">
+            </div>
+            <div class="filter-group">
+                <label for="filterStudent">Student ID</label>
+                <input type="text" id="filterStudent" placeholder="Enter student ID">
+            </div>
+            <div class="filter-group">
+                <label for="filterStatus">Status</label>
+                <select id="filterStatus">
+                    <option value="">All</option>
+                    <option value="present">Present</option>
+                    <option value="absent">Absent</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Student ID</th>
+                        <th>Student Name</th>
+                        <th>Status</th>
+                        <th>Department</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <p>No attendance records found.</p>
+            </div>
+        </div>
+
+        <button class="export-btn" onclick="exportToCSV()">📥 Export to CSV</button>
+        <a href="/admin/dashboard" class="back-link">← Back to Dashboard</a>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>© Sankara College of Science and commerce — Built with ❤️</p>
+        </div>
+    </footer>
+
+    <script>
+        async function loadAttendance() {
+            try {
+                const response = await fetch('/api/attendance');
+                const data = await response.json();
+                
+                const tbody = document.querySelector('#attendanceTable tbody');
+                const emptyState = document.getElementById('emptyState');
+                
+                if (!data.records || data.records.length === 0) {
+                    emptyState.style.display = 'block';
+                    tbody.innerHTML = '';
+                } else {
+                    emptyState.style.display = 'none';
+                    tbody.innerHTML = data.records.map(record => `
+                        <tr>
+                            <td>${record.date || '-'}</td>
+                            <td>${record.time || '-'}</td>
+                            <td>${record.student_id || '-'}</td>
+                            <td>${record.student_name || '-'}</td>
+                            <td><span class="status-${record.status?.toLowerCase() || 'absent'}">${record.status || 'Absent'}</span></td>
+                            <td>${record.department || '-'}</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) {
+                console.error('Error loading attendance:', e);
+                document.getElementById('emptyState').style.display = 'block';
+            }
+        }
+
+        function exportToCSV() {
+            const table = document.getElementById('attendanceTable');
+            let csv = [];
+            
+            // Add headers
+            const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent);
+            csv.push(headers.join(','));
+            
+            // Add rows
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const cells = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim());
+                csv.push(cells.join(','));
+            });
+            
+            // Download
+            const csvContent = 'data:text/csv;charset=utf-8,' + csv.join('\n');
+            const link = document.createElement('a');
+            link.setAttribute('href', encodeURI(csvContent));
+            link.setAttribute('download', `attendance_${new Date().toISOString().split('T')[0]}.csv`);
+            link.click();
+        }
+
+        // Load attendance on page load
+        window.addEventListener('load', loadAttendance);
+
+        // Filter functionality
+        document.getElementById('filterDate').addEventListener('change', loadAttendance);
+        document.getElementById('filterStudent').addEventListener('change', loadAttendance);
+        document.getElementById('filterStatus').addEventListener('change', loadAttendance);
+    </script>
+</body>
+</html>

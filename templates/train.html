@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Train Model — Face Attendance System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .train-container {
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .train-card {
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(3,10,18,0.8);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .train-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .train-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, var(--accent), #5df2c6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .train-header p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .info-box {
+            background: rgba(59,227,176,0.05);
+            border: 1px solid rgba(59,227,176,0.2);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            margin: 0 0 0.75rem 0;
+            color: #3be3b0;
+            font-size: 1rem;
+        }
+
+        .info-box p {
+            margin: 0 0 0.5rem 0;
+            color: var(--muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat {
+            background: rgba(255,255,255,0.02);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 0;
+        }
+
+        .stat-label {
+            margin: 0.5rem 0 0 0;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .progress-container {
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .progress-container.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #5df2c6);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            color: var(--muted);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .train-btn {
+            width: 100%;
+            padding: 0.85rem;
+            background: linear-gradient(90deg, var(--accent), #5df2c6);
+            color: #042018;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .train-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59,227,176,0.3);
+        }
+
+        .train-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="brand">
+                <h1 class="college">Sankara College of Science and commerce</h1>
+                <p class="tag">Face Recognition Attendance</p>
+            </div>
+            <nav class="nav">
+                <a href="/">Home</a>
+                <a href="/register">Register</a>
+                <a href="/train">Train</a>
+                <a href="/attendance">Attendance</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container train-container">
+        <div class="train-card">
+            <div class="train-header">
+                <h1>🤖 Train Model</h1>
+                <p>Train the face recognition model with collected data</p>
+            </div>
+
+            <div class="info-box">
+                <h3>ℹ️ How it works</h3>
+                <p>The training process analyzes all registered student faces and creates a model for accurate face recognition. This usually takes 1-2 minutes.</p>
+                <p><strong>Important:</strong> Make sure all student registrations are complete before training.</p>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <p class="stat-value" id="totalStudents">0</p>
+                    <p class="stat-label">Registered Students</p>
+                </div>
+                <div class="stat">
+                    <p class="stat-value" id="totalFaces">0</p>
+                    <p class="stat-label">Face Samples</p>
+                </div>
+            </div>
+
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p class="progress-text">Training in progress... <span id="progressPercent">0</span>%</p>
+            </div>
+
+            <form id="trainForm" method="POST" action="/train">
+                <button type="submit" class="train-btn" id="trainBtn">Start Training</button>
+            </form>
+
+            <a href="/admin/dashboard" class="back-link">← Back to Dashboard</a>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>© Sankara College of Science and commerce — Built with ❤️</p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('trainForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('trainBtn');
+            const container = document.getElementById('progressContainer');
+            
+            btn.disabled = true;
+            container.classList.add('active');
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress > 100) progress = 100;
+                
+                document.getElementById('progressFill').style.width = progress + '%';
+                document.getElementById('progressPercent').textContent = Math.floor(progress);
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        this.submit();
+                    }, 500);
+                }
+            }, 300);
+        });
+
+        // Load stats on page load
+        window.addEventListener('load', function() {
+            fetch('/api/stats')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('totalStudents').textContent = data.students || 0;
+                    document.getElementById('totalFaces').textContent = data.faces || 0;
+                })
+                .catch(e => console.log('Stats unavailable'));
+        });
+    </script>
+</body>
+</html>

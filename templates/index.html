@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Face Attendance System — Sankara College of Science and commerce</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="brand">
+                <h1 class="college">Sankara College of Science and commerce</h1>
+                <p class="tag">Face Recognition Attendance</p>
+            </div>
+            <nav class="nav">
+                <a href="/">Home</a>
+                <a href="/register">Register</a>
+                <a href="/train">Train</a>
+                <a href="/attendance">Attendance</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-grid">
+        <section class="hero">
+            <div class="hero-card">
+                <h2>Welcome</h2>
+                <p>Automated, fast and secure attendance using face recognition.</p>
+                <div class="controls">
+                    <a class="btn primary" href="/register">Register Face</a>
+                    <a class="btn" href="/train">Train Model</a>
+                </div>
+            </div>
+            <div class="video-card">
+                <div class="video-wrap">
+                    <img alt="Live camera" src="{{ url_for('video') }}">
+                </div>
+                <p class="status">✔ Known Face → Present &nbsp; | &nbsp; ❌ Unknown → Rejected</p>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="feature">
+                <h3>Easy Registration</h3>
+                <p>Capture faces quickly and add students to the dataset.</p>
+            </div>
+            <div class="feature">
+                <h3>Model Training</h3>
+                <p>Train on the collected dataset for accurate recognition.</p>
+            </div>
+            <div class="feature">
+                <h3>Attendance Reports</h3>
+                <p>Export attendance logs and review daily summaries.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>© Sankara College of Science and commerce — Built with ❤️</p>
+        </div>
+    </footer>
+</body>
+</html>
